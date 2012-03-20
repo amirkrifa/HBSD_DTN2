@@ -1,0 +1,35 @@
+Message to send in order to ask for newer statistics:
+
+Returned by StatisticsManager::getMessageNodesCouples whic makes successive calls to StatisticsManager::GetVersionBasedDescription ( for each message)
+get_messages_ids_based_on_version_for_stat_request: 
+
+
+(messageId)REGION1,_o79:0r1*(nodeId)REGION1,_o719:0@(Stat Versions)3 
+$ 
+(Node Id)REGION1,_o721:0@(Stat Version)5
+\
+REGION1,_o79:0r2*REGION1,_o719:0@2
+\
+REGION1,_o79:0r3*REGION1,_o719:0@0
+\
+REGION1,_o127:0r1*REGION1,_o719:0@3
+#
+
+
+
+Stat to send In counter par to the request:
+
+Returned by StatisticsManager::getStatToSendBasedOnVersions which makes calls to StatisticsManager::getSubSetDescription
+
+(MessageId)REGION1,_o127:0r1+(TTL)3600.000000*(NodeId)REGION1,_o79:0=(Last Meeting Time)0.000000@(Stat Version)3?(Mi Start Index)3(number copies samples map)[0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+\
+REGION1,_o79:0r1+3600.000000*REGION1,_o239:0=0.000000@2?2[0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+$
+REGION1,_o79:0=0.000000@4?0[1,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0]
+\
+REGION1,_o79:0r2+3600.000000*REGION1,_o239:0=0.000000@0?0[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+$
+REGION1,_o79:0=0.000000@2?0[1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+\
+REGION1,_o79:0r3+3600.000000*REGION1,_o79:0=0.000000@0?0[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+#

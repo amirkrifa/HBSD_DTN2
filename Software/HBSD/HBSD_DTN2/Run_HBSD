@@ -1,0 +1,2 @@
+./bin/HBSD_Router -config_file ./Config/HBSD.conf -xml ./Config/router.xsd -log_file ./Log/LogFile -log_level 6
+

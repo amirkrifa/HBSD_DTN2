@@ -1,0 +1,35 @@
+CPP	:= g++
+
+SRCS	:= ./src/Util.cpp ./src/Bundle.cpp ./src/Bundles.cpp ./src/ConfigFile.cpp ./src/GBOF.cpp ./src/Handlers.cpp ./src/HBSD.cpp ./src/HBSD_Policy.cpp ./src/HBSD_Routing.cpp ./src/HBSD_SAX.cpp ./src/Link.cpp ./src/LinkPolicyManager.cpp ./src/Links.cpp ./src/Logging.cpp ./src/Node.cpp ./src/Nodes.cpp ./src/PeerListener.cpp ./src/Policy.cpp ./src/Requester.cpp ./src/Routes.cpp ./src/XMLTree.cpp ./src/Console_Logging.cpp ./src/main.cpp 
+
+OBJS	:= $(addsuffix .o,$(basename ${SRCS})) 
+
+HEADERS	:= $(addsuffix .h,$(basename ${SRCS})) 
+
+LIBS	:= -lpthread -lxerces-c -L/user/akrifa/home/Xerces-C_2_8_0/lib -L./src
+
+OPT	:= -O3 -g --verbose -fomit-frame-pointer -s
+#INCS	:= -iquote. -iquote/user/akrifa/home/Xerces-C_2_8_0/include/xercesc/sax2/ -iquote/user/akrifa/home/Xerces-C_2_8_0/include/
+#Add your Includes Path here
+export CPLUS_INCLUDE_PATH=.:./src:/user/akrifa/home/Xerces-C_2_8_0/include/
+#export LIBRARY_PATH=./src:./:/user/akrifa/home/Xerces-C_2_8_0/lib
+
+
+
+
+all : HBSD_Router
+
+HBSD_Router: $(OBJS)
+	$(CPP) ${INCS} $(OBJS) -o $@ $(LIBS)
+	make install
+
+%.o : %.cpp
+	${CPP} -c ${OPT} ${INCS} $< -o $@ ${LIBS}
+
+install:
+	-mv ./HBSD_Router ./bin/HBSD_Router
+	./bin/HBSD_Router -help
+clean :
+	-rm ./src/*.o ./src/*~
+	-clear
+ 

@@ -1,0 +1,109 @@
+# Example HBSD configuration file.
+# Author: Amir Krifa
+# Email: krifa.amir@gmail.com
+
+# To define this external router's endpoint, which is typically used to
+# receive control messages from peer instances of the router. An example
+# is meta data exchanged between the routers. DTN special-cases endpoints
+# that begin with "ext.rtr/".
+routerEndpoint="ext.rtr/HBSD"
+
+# Defines the multicast group the HBSD router is to join for communicating
+# with the DTN daemon.
+multicastGroup=224.0.0.2
+
+# Defines the multicast port used by the DTN daemon.
+multicastPort=8001
+
+# The DTN daemon, dtnd, listens for messages from HBSD on a multicast
+# socket. When HBSD sends requests to dtnd it does not want other
+# DTN daemons or instances of HBSD on other systems to receive the
+# multicast packets; the scope should be limited to the local host.
+# This should be accomplished by setting the TTL for the socket to 0,
+# but this doesn't always seem to work. Another approach is to use a
+# datagram socket bound to the loopback interface. This doesn't work
+# on other systems. The following defines which behavior to use. If
+# set to true use a multicast source socket with a TTL of 0, otherwise
+# use a source datagram socket bound to the loopback address.
+multicastSends=false
+
+# Address to bind to if multicastSends=false.
+loopbackAddress=127.0.0.1
+
+# File containing the XML schema definition for the messages exchanged
+# with the DTN daemon. The command line takes precendence.
+xmlSchema=../router.xsd
+
+# If set to false then the XML received from the daemon is not validated
+# against the schema.
+xmlValidate=true
+
+# Allows for a user-specified logging class. The default is Console_Logging,
+loggingClass=Console_Logging
+
+# Logging configuration file. The format of the file is defined by the
+# logging class being used. The command line takes precedence.
+logConfiguration= ../Log/LogFile
+
+# Allows the logging level to be specified here rather than the command
+# line. The command line takes precedence. If a logging level is not
+# specified then the default is defined by the logger.
+logLevel=6
+
+# By default HBSD terminates when dtnd indicates that it is shutting
+# down. Set the following to false to override the behavior.
+#terminateWithDTN=true
+
+# Initial capacity of the map of all bundles on the system.
+bundlesActiveCapacity=384
+
+# Initial capacity of the map of all links.
+linksHashCapacity=16
+
+# Initial capacity of the map of all nodes.
+nodesHashCapacity=32
+
+#
+# HBSD_Policy specific configuration parameters.
+#
+
+# Specifies where HBSD checkpoints bundles known to have been
+# delivered to their destination nodes.
+#policyAckFile=/var/rapid_router/acks
+
+# HBSD gives replication priority to bundles whose known replication
+# count doesn't exceed this value.
+#policyMaxReplicationCount=3
+
+# Initial capacity of table of all present locally generated bundles.
+#policyLocalBundlesCapacity=256
+
+# Initial capacity of table of all present remote generated bundles.
+#policyForeignBundlesCapacity=256
+
+# Initial capacity of table of all known acknowledgments.
+#policyAckedBundlesCapacity=256
+
+# Initial capacity of table of all known bundles, present or otherwise.
+#policyKnownBundlesCapacity=512
+
+# Initial capacity of tables noting bundles possessed by a specific node.
+#policyNodeBundlesCapacity=64
+
+# Initial capacity of tables noting acks possessed by a specific node.
+#policyNodeAcksCapacity=64
+
+# Initial capacity of tables noting a specific node's contact with other
+# nodes.
+#policyNodeContactCapacity=16
+
+# Initial capacity of table of all known nodes.
+#policyKnownNodesCapacity=16
+
+# Initial size of the delivery queue.
+#policyDeliveryQueueCapacity=24
+
+# Instructs the HBSD_Policy class to load a user-defined class for 
+# managing links.
+#linkPolicyClass=
+ 

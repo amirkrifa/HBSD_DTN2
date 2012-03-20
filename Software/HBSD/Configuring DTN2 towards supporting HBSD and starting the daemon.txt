@@ -1,0 +1,128 @@
+Configuring DTN2 towards supporting the HBSD external router and starting the daemon
+
+Configuration
+--------------
+
+In this section, we'll prepare an appropriate dtn.conf file for our instance of dtnd.
+
+Directories
+-------------
+
+First, you need to choose a directory that will hold the files dtnd needs. 
+For the purposes of this tutorial, we'll assume your username is amir and that you want dtnd to write into /home/amir/hbsd-dtn2-conf.
+Make the /home/amir/hbsd-dtn2-conf directory, then copy the example dtn.conf file from DTN2/daemon/dtn.conf to /home/amir/hbsd-dtn2-conf/dtn.conf. 
+
+
+Editing dtn.conf
+-----------------
+
+Edit the dtn.conf file. 
+
+We'll use the simplest database to configure, BerkeleyDB. 
+Leave the storage set type berkeleydb line alone. 
+
+Set the payloaddir to /home/amir/hbsd-dtn2-conf/bundles and set the dbdir to /home/amir/hbsd-dtn2-conf/db.
+
+The dbdir directory is where persistent objects that DTN2 uses to manage its internal state live. This database will remain fairly small. 
+It needs to be preserved between invocations of the DTN2 daemon, because the data in it lets DTN2 know the status of registrations with clients, and bundles which are in flight in the network. 
+One of the "disruptions" that a DTN is tolerant of is the failure of a node. Using the data in the database, a new DTN2 daemon can carry on the work the previous one was doing. 
+But note that if the contents of the database are lost, it is as if this node never existed, and there will be repercussions in the DTN (like retransmissions of bundles) as a result.
+
+The payload directory is where bundles which are in-flight live. In general, the bundles in this directory are ones which this DTN2 instance has custody of. 
+That means that if they disappear out of this directory, they will be lost forever, since there are no other authoritative copies of the bundle in the network. 
+DTN2 and the DTN protocols are designed to maintain the files in this directory without leaving old ones lying around. If you see an old file there, it's likely due to a bug. 
+Please help us get to the bottom of what's causing it. Unlike packets, which are typically quite small (from 50 to 64,000 bytes), a single bundle can be very large (over 2 gigabytes). 
+On a server dedicated to running DTN2, your payload directory should have access to the largest partition on your server. As an analogy, on a mail server the mail spool is usually on /var, and has access to the majority of the extra disk space on a machine. The same should be true for the payload directory.
+
+Router EID:
+
+You don't need to make any changes in the local_eid, but scroll down and take a look at it anyway. In the defualt configuration, it looks like this: route local_eid "dtn://[info hostname].dtn". Note the square brackets. To understand what's happening here, you need to know that this configuration file is not simply a file of settings for dtnd, but an actual TCL script. 
+It is interpreted by the TCL interpreter that is built in to dtnd. In TCL, square brackets mean "interpret this first, and replace the brackets with the result". 
+So before dtnd sees a route local_eid ... command, TCL processes the info hostname command. As you might be able to guess by now, the entire line results in the local_eid being set to a custom string based on your hostname.
+
+This is the only place in this particular configuration file where we will use TCL features like the square brackets. However, you should remember that all the power of TCL is available to you as you write your own configuration files, should you desire it. For an example of this, see the example showing how to rotate logs from within dtnd.
+
+So the local EID is set, but what is it? From the Architecture section, you should recall that nodes in the DTN are identified by EIDs. The local EID is simply the way our DTN node will refer to itself. Without this setting, it would not recognize bundles intended for it, and might just pass them on ad infinitum! People who have configured Internet email systems like Postfix or Sendmail might recognize this setting, as mail routers need to know their own name for the same reason.
+
+And EID is a string that is used throughout the DTN to identify an endpoint. That leaves you considerable latitude on how to set it. We recommend for now that you set it according to the machine name where the DTN node is running, as the example does.
+
+At this time, one dtnd can have only one local EID. This limitation might disappear in future versions if it proves to be a problem.
+
+Interfaces:
+
+Take a look at the interface add commands a few lines down. The command interface add tcp0 tcp adds a TCP convergence layer named tcp0 to the server. This means that the daemon will start listening on port 4556 for incoming connections from other servers in the DTN.
+
+Usually DTN nodes that are communicating via TCP listen on port 4556, based on the IANA port assignment. If you have another application on the same server listening on port 4556, you'll need to choose a different port for your dtnd to use.
+
+The interface add command can take convergence layer specific arguments to customize the behavior of the interface. For the purposes of this tutorial, we will be using the defaults. For more information on these arguments see the reference pages on the various convergence layers.
+
+In some security contexts, and with some virtual interface configurations, it is desirable to have dtnd listen only on a certain interface, for instance "listen to internal connections only". You can do this by adding local_addr=desired-ip to the end of the interface add command. The default local_addr is 0.0.0.0, meaning "listen on all interfaces". For this tutorial, we will allow dtnd to listen on all interfaces, so leave the interface add command as it is.
+
+Note that we are adding an interface of type TCP. There are other ways that DTN nodes can communicate, including via UDP, raw ethernet frames, and across a filesystem (where some external activity, like a messenger with a USB keychain drive, is responsible for moving the files). A server that is using multiple convergence layers has other interface add lines in the configuration file.
+
+In fact, below the interface add line for the TCP convergence layer is one for the UDP covergence layer. Because we are setting up a standalone server in this tutorial, neither udp0 nor tcp0 will end up getting used to move bundles at this point.
+
+
+Links and Routes:
+
+HBSD requires that the DTN2 configuration file include the following line:
+
+param set early_deletion false
+
+If this option is not set then DTN2 may delete bundles after they have been initially sent, preventing HBSD from replicating 
+bundles.
+
+
+You also need to make certain that DTN2 is configured to use an external router:
+
+route set type external
+
+HBSD also assumes that DTN2 is configured to open and close links as nodes come in and out of contact. 
+This may include using a discovery protocol. The HBSD_Policy class supports the ability to add a simple link management class.
+
+
+Initializing the DTN2 Database
+---------------------------
+
+Before dtnd can use the database to keep track of runtime state, it needs to initialize it. 
+This is a simple matter of starting the daemon once with the --init-db argument. 
+You'll also want to give it the location of the configuration file, so that dtnd can find the correct database directory. Put that together and you have:
+
+$ ./daemon/dtnd -c /home/amir/hbsd-dtn2-conf/dtn.conf --init-db 
+
+
+Running the DTN2 Daemon
+-------------------
+
+For now, you start dtnd from the commandline, like any other Unix command. By default, the TCL interpreter takes input from standard in, 
+so you will need to leave it running in the foreground. While you are learning the ins and outs of dtnd, it is best to run it this way, so that you can interact with it. 
+Use the -c argument to tell it where to find the configuration file. For information on other arguments you can give dtnd, see the dtnd man page.
+
+Once you start dtnd with a command like DTN2/daemon/dtnd -c /home/amir/hbsd-dtn2-conf/dtn.conf, it will put out some messages, then give you 
+the dtn% prompt. This means the server is up and running, awaiting commands from you. Things you type at the prompt are interpreted by the 
+same TCL interpreter that just parsed the configuration file. In a way, you can consider the configuration file a list of commands that will 
+be issued for you each time you start the server.
+
+Here's an example of starting up the server:
+
+$ daemon/dtnd -c /home/amir/hbsd-dtn2-conf/dtn.conf
+
+You get a bit more info if you start up with the '-l info argument':
+
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/amir/lib:/home/amir/DTN2/xerces-c-src_2_8_0/lib/
+export PATH=$PATH:/home/amir/lib:/home/amir/DTN2/xerces-c-src_2_8_0/lib/
+./daemon/dtnd -c /home/amir/hbsd-dtn2-conf/dtn.conf -l info
+
+Use the online help system to learn what you can do from here. Type help. For help on a specific command, type help command. 
+
+
+2618
+10.0.1.23
+Exporting paths:
+
+
+basic_string::_S_construct NULL not valid
+
+
+
+

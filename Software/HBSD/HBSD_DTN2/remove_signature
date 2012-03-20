@@ -1,0 +1,13 @@
+#!/bin/bash
+# Removes the BOM sifnature if any
+mkdir tmpSrc
+cp ./src/*.cpp ./tmpSrc/
+cp ./src/*.h ./tmpSrc/
+cd tmpSrc
+for file in `ls`
+do
+	uconv --remove-signature $file -o ../src/$file
+done
+cd ..
+rm -rf tmpSrc
+echo "BOM Signature removed !"

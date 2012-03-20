@@ -1,0 +1,248 @@
+What happens when the HBSD_DTN2 daemon starts
+---------------------------------------------
+
+Main.cpp:
+
+- Get options.
+- Get values from the configuration file.
+- Initialize logging to use during execution. Only set
+the logging level if specified in the command line or HBSD
+configuration file, otherwise we are content with what the
+logging system defaults to.
+- Set up our SAX XML handler.
+- Set up multicast socket that we'll be receiving messages
+from the DTN daemon on.
+- Then, start the HBSD Router main thread HBSD* mainRouter = new HBSD(HBSD::THRD_ROUTERLOOP);		
+- Then, startRouterLoop(); is called within the HBSD constructor
+
+
+- The HBSD router is initialized within startRouterLoop and the loop is started
+- Waiting to receive Multicast messages from the DTN2 daemon
+
+- Once a multicast message is received, it is logged, converted to a MemBufInputSource then, forwarded to the saxReader->parse method. There it will be parsed and dispatched according 
+to its content
+
+- Note that saxReader = XMLReaderFactory::createXMLReader(); and that its ErrorHandler as well as its ContentHandler are set to our saxHandler.
+where saxHandler = new HBSD_SAX(handlerHBSD); and handlerHBSD = new HBSD_Routing();
+
+
+- So saxReader parses the received xml messages, dispatch them to saxHandler that triggers in return the matching routing method in handlerHBSD (the HBSd routing handler).
+
+- List of the event handled by HBSD_SAX:
+
+BUNDLE_RECEIVED_EVENT;
+DATA_TRANSMITTED_EVENT;
+BUNDLE_DELIVERED_EVENT;
+BUNDLE_DELIVERY_EVENT;
+BUNDLE_SEND_CANCELLED_EVENT;
+BUNDLE_EXPIRED_EVENT;
+BUNDLE_INJECTED_EVENT;
+LINK_OPENED_EVENT;
+LINK_CLOSED_EVENT;
+LINK_CREATED_EVENT;
+LINK_DELETED_EVENT;
+LINK_AVAILABLE_EVENT;
+LINK_UNAVAILABLE_EVENT;
+LINK_ATTRIBUTE_CHANGED_EVENT;
+CONTACT_ATTRIBUTE_CHANGED_EVENT;
+LINK_BUSY_EVENT;
+EID_REACHABLE_EVENT;
+ROUTE_ADD_EVENT;
+ROUTE_DELETE_EVENT;
+CUSTODY_SIGNAL_EVENT;
+CUSTODY_TIMEOUT_EVENT;
+INTENTIONAL_NAME_RESOLVED_EVENT;
+REGISTRATION_ADDED_EVENT;
+REGISTRATION_REMOVED_EVENT;
+REGISTRATION_EXPIRED_EVENT;
+BUNDLE_REPORT;
+LINK_REPORT;
+ROUTE_REPORT;
+ 
+- HBSD_Routing class provides a method for each of the last event.
+- The default policy used by the HBSD_Routing object is the HBSD_Policy so, policyMgr within HBSD_Routing is initialized to new HBSD_Policy(); 
+- The policyMgr object is initialized within the HBSD_Routing constructor
+
+- The HBSD_Routing class enherits from the Handlers class which is associated to the Links, Bundles, Nodes and the Routes class. The later classes are used to manage and update the Network status upon 
+- receiving any new event from the DTN2 daemon.
+
+HBSD External Router Classes
+----------------------------
+
+// PeerListener Class
+
+The PeerListener object exists as a thread dedicated to processing router-specific bundles
+received by peer routers. DTN2 specifies that any EID with an endpoint that begins with ext.rtr
+(e.g., dtn://node.dtn/ext.rtr/HBSD) is to be destined for an external router, and it generates a
+specific XML event when it receives a bundle containing the ext.rtr endpoint. When the
+HBSD_Routing class receives the event, it dispatches the PeerListener object’s thread to
+process the bundle. Specifically, the PeerListener thread extracts the data from the bundle,
+deletes the bundle, and then makes a call into the Policy Manager passing the bundle’s data.
+This is the recipient half of the mechanism for exchanging meta data between routers. To send
+meta data, the policy manager must inject a bundle into DTN2. This is done by the Policy
+Manager via a method in the Requester class.
+
+
+// Requester Class
+
+This is a utility class responsible for composing and sending all XML messages to the DTN2
+daemon. These classes are used throughout HBSD. Most XML messages sent to DTN2 are
+stateless: an event may cause DTN2 to do something that results in an XML message being
+received by the router, but it is generally up to the router to correlate events. Also, events sent to
+DTN2 typically do not have negative acknowledgments. For example, the router may send a
+request to DTN2 to inject a bundle and later the router may receive an XML message indicating
+that a bundle was injected. But DTN2 will not send an XML message if it fails to inject the bundle.
+The same is true for transmitting bundles on a link.
+
+To expand on injecting a bundle, since it is fundamental to HBSD exchanging meta data with a
+peer node: When the Requester injects a bundle for the router it assigns a unique request ID to
+the bundle. It is up to the policy manager to later associate the injected bundle with the request
+using the id. The Requester only plays a minor role in injecting bundles: it sends the request to
+DTN2 after the policy manager creates the data. But it should be noted that injected bundles are
+handled differently from other bundles by HBSD. HBSD creates a Bundle object for an injected
+bundle, but it does not retain knowledge of the bundle in the Bundles class.
+
+
+// GBOF class
+
+This is another utility class, and it contains static methods for manipulating the GBOF. This
+includes formatting the GBOF as XML as required by DTN2. It also includes methods for creating
+a hash key from the values that make up the GBOF. This hash key is used extensively and
+consistently throughout HBSD and the Policy Manager for referencing a bundle.
+
+
+// HBSD Class
+
+The HBSD class contains the main body of the router. This class reads the command line
+arguments, loads the configuration file (if defined), starts logging, and sets up the SAX (Simple
+API for XML) handler. Once initialized, it joins the DTN2 multicast group and continuously loops
+receiving locally broadcast messages from the DTN2 daemon, dtnd. When XML messages are
+received from DTN2, the SAX handler is responsible for parsing the message and dispatching the
+appropriate method.
+
+
+// HBSD_SAX
+
+This class is invoked when HBSD receives an XML message from the DTN2 daemon. It extends
+the C++ SAX DefaultHandler class. HBSD_SAX parses the XML message and calls the
+corresponding method in the Handlers class.
+
+
+// Handlers
+
+This is an abstract class that defines a method for each XML event message that may be
+received by HBSD_SAX. The HBSD_Routing class is the real implementation of the Handlers
+class. We use an abstract class that supplies null methods for all XML messages. If the class that
+extends Handlers, i.e. HBSD_Routing, does not support an event then the empty method in
+Handlers in invoked.
+
+// XMLTree
+
+This is a utility class. When HBSD_SAX parses an XML message each element is placed in an
+XMLTree object. XMLTree objects may be linked to each other to represent the hierarchy of
+elements in an XML message. XMLTree objects have methods for accessing attributes and child
+elements.
+
+// HBSD_Routing
+
+The HBSD_Routing class is the heart of the router, extending the methods defined by Handlers.
+It is here that the XML messages sent by the DTN2 daemon, as represented by XMLTree
+objects, are initially acted upon.
+
+// Logging
+
+This is an interface that defines the logging class used by the HBSD router. HBSD provides one
+implementation of the Logging class: Console_Logging. By default,
+Console_Logging is used though you can define which implementation to invoke via the HBSD
+configuration file. We use a configurable logging class so that others may implement their own
+loggers, allowing them to customize logging to meet specific needs.
+
+// Console_Logging
+
+This is a simple implementation of the Logging interface that outputs logging messages to stdout.
+It is the default logging class
+
+// ConfFile
+
+This is a utility class that reads and parses the HBSD configuration file.
+
+// Bundles
+
+This class manages the set of individual Bundle objects.
+
+// Node
+
+A Node object represents a node, e.g. dtn://node.dtn. HBSD creates a Node object whenever it
+learns of a node, such as when a link is established to a node, or when a received bundle
+references a node. The Policy Manager is also able to create Node objects as it learns about
+other nodes. Node objects contain three transmission queues for sending bundles: a meta data
+queue, a destination queue and a replica queue. The meta data queue is intended for bundles
+destined for that node’s router. The destination queue is for bundles destined for that node; and
+the replica queue is for bundles to be replicated on the node for further routing. The
+implementation of the queues is maintained by the Policy Manager.
+
+//Nodes
+
+This is the class that manages the set of individual Node objects.
+
+// Link
+
+A Link object represents a DTN2 link and an instance is created whenever DTN2 notifies HBSD
+that it has created a link. A Link object may become associated with a Node object when the link
+is opened; a DTN2 link that is not open is not associated with a Node. When a link is open it
+represents communication with another node. HBSD will associate the Link with the
+corresponding Node object, unless the Node object is already associated with another Link
+object. A node will never be associated with more than one link, even if there are multiple links
+open to the same node. Link objects use a separate Link Thread, in addition to executing on the
+main HBSD thread. The Link Thread is generally dormant unless the link is open and the Link
+object is associated with a Node object. The Link Thread is responsible for removing a bundle
+from one of the Node’s three transmission queues and initiating a request to DTN2 for the bundle
+be transmitted.
+
+// Links
+
+The Link class manages the set of individual Link objects.
+
+// Routes
+
+The Routes object maintains the persistent and temporal routes. A route is simply a mapping of a
+Node (as identified by the node portion of the EID) to a Link. Persistent routes identify links that
+are either open or closed. A temporal route maps a Node to an open link. Temporal links are
+created when a link is opened, even if there exists a persistent route. A node can be mapped to
+more that one link via separate routes. Note that a temporal route is separate from the
+association between a Link object and a Node object described above. A temporal link is a
+prerequisite for an association, but the association defines the Node object’s active link. As
+previously noted, a Node object will never have more than one active link.
+
+// Policy
+
+The Policy class defines the interface to be implemented by a Policy Manager. The interface
+source code describes the individual methods. By default, HBSD_Policy implements this class,
+but other implementations can be defined via the HBSD configuration file.
+
+// HBSD_Policy
+
+This class is an implementation of the Policy class. It provides the HBSD routing algorithm, but it
+is also generically referred to as the Policy Manager. There are calls into the Policy class
+sprinkled throughout the router, often mirroring the XML events defined by the /etc/router.xsd
+schema file. HBSD_Policy largely consists of manipulating shadow data structures dealing with
+bundles and nodes. The primary function of HBSD_Policy is to prioritize the delivery and
+replication of bundles in anticipation of the local node coming into contact with another node. The
+assumption is that HBSD will be able to replicate only a subset of its bundles on each node that it
+meets, and that some of the bundles will expire before HBSD comes in contact with the actual
+destination node. HBSD has no a priori knowledge of the network state, but as it comes into
+contact with other nodes it exchanges meta data with its HBSD peers to help it make better
+decisions.
+
+// LinkPolicyManager
+
+This is another interface class, and by default there is no implementation of the class. This
+interface is specific to the HBSD_Policy class rather than defined by the HBSD router. If an
+implementation of this class exists, HBSD_Policy will call into the LinkPolicyManager each time a
+link is created, deleted, opened or closed, or if there is a request by the router to open a link. This
+class can also take advantage of HBSD’s XML interface into DTN2 for creating, opening and
+closing links. The intent of this interface is to allow for system- or network-specific link
+management routines to be utilized, possibly including discovery of opportunistic links.
+
+
+

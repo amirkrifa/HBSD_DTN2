@@ -1,0 +1,60 @@
+Installing the package DTN2 + HBSD Router
+
+Building DB
+------------
+
+cd build_unix &&
+../dist/configure --prefix=$HOME --enable-test --enable-tcl  --with-tclconfig=/home/amir/lib && make
+
+Installing Xerces-c-2.8
+-------------------------
+
+Before doing the build, you must first set your environment variables to pick-up the compiler and also specify where you extracted Xerces-C++ on your machine. While the first one is probably set for you by the system administrator, just make sure you can invoke the compiler. You may do so by typing the compiler invocation command without any parameters (e.g. xlc_r, or g++, or cc) and check if you get a proper response back.
+
+Next set your Xerces-C++ root path as follows:
+	
+export XERCESCROOT=/home/amir/xerces-c-src_2_8_0
+
+
+This should be the full path of the directory where you extracted Xerces-C++. Note that this path should not have any spaces in it or the build process will fail. The only UNIX environments where this is likely to occur in are MinGW and Cygwin as the home directories are by default '/home/User Name' and '/cygdrive/c/Documents and Settings/' respectively. On Windows user names can, and often do, contain spaces.
+
+
+cd src/xercesc
+./runConfigure -plinux -cgcc -xg++ -P$HOME
+
+make
+
+
+Installing Oasys
+----------------
+
+We suppose that there is an already DB (Berkeley Database) installed.
+
+run
+
+./configure --prefix=$HOME --with-xerces-c=/home/amir/include --exec-prefix=$HOME --with-tcl=/home/amir --with-dbver=4.8 --with-db=/home/amir
+
+Then,
+
+make
+
+make install
+
+
+Installing the HBSD Router
+-------------------------
+
+run the following:
+
+make 
+make install
+
+
+Installing DTN2
+---------------
+
+./configure -C --prefix=$HOME  
+make;make install
+
+
+

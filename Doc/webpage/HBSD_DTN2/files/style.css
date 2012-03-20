@@ -1,0 +1,320 @@
+<STYLE TYPE="text/css">
+<!--
+/* WinNS4 */
+body, td	{
+	font-family:	Arial, Helvetica, sans-serif;
+	margin: 0;
+	}
+PRE, CODE, TT	{ font-family:	monospace; }
+
+
+
+
+/* WinNS4 */
+h1, h2, h3, h4, h5, h6, th, dt	{ font-family:	Arial, Helvetica, sans-serif;}
+
+
+
+
+/* WinNS4 */
+	/* begin affordances */	/* 7 - rubric */
+		
+A, ADDRESS, BLOCKQUOTE, BODY, CITE, CODE, DD, DEL, DFN,		
+DIV, DL, DT, EM, FORM, H1, H2, H3, H4, H5, H6, IFRAME, IMG, KBD,		
+LI, OBJECT, OL, P, Q, SAMP, SMALL, SPAN, STRONG, SUB, SUP, UL, VAR, 		
+APPLET, BIG, CENTER, DIR, FONT, HR, MENU, PRE,		
+ABBR, ACRONYM, BDO, BUTTON, FIELDSET, INS, LABEL, LEGEND	{	
+	word-spacing:	normal;
+	letter-spacing:	normal;
+	text-transform:	none;
+	text-decoration:none;
+	border-color:	#999;
+	border-style:	none;
+	}	
+		
+BODY,CAPTION	{	
+	color:	black;
+	}	
+		
+EM	{	
+	font-style:	normal;
+	font-weight:	bold;
+	color:	black;
+	}	
+		
+STRONG	{	
+	font-style:	italic;
+	font-weight:	bold;
+	color:	black;
+	}	
+		
+EM STRONG, STRONG EM	{	
+	text-transform:	uppercase;
+	font-style:	normal;
+	font-weight:	bolder;
+	background:	 #FFFFF5;
+	color:	black;
+	}	
+		
+.warning	{	
+	text-transform:	none;
+	font-style:	normal;
+	font-weight:	bolder;
+	background:	 #FF0;
+	color:	red;
+	}	
+		
+DEL	{	
+	text-decoration:	line-through;
+	background:	 #FC6;
+	}	
+		
+INS	{	
+	text-decoration:	none;
+	background:	 #9F3;
+	}	
+		
+VAR, CITE, DFN, .note	{	
+	font-style:	italic;
+	}	
+		
+ADDRESS	{	
+	font-style:	normal;
+	letter-spacing:	.1em;
+	color: black;
+	align:right;
+	}	
+		
+CODE, KBD, SAMP	{	
+	font-family:	Monotype.com, Courier New, monospace;
+	}	
+		
+ACRONYM	{	
+	font-variant:	small-caps;
+	letter-spacing:	0.1em;
+	}	
+		
+ H4, H5, H6, DT, LEGEND, TH, THEAD, TFOOT	{	
+	color:	yellow;
+	}	
+H3 { font-weight:	italic;  }
+H1 {
+	align:center;
+	color:black;
+}		
+H2 {
+	color:black;
+}
+HR	{	
+	color:	black;
+	}	
+		
+.colophon	{	
+	display:	none;
+	}	
+		
+COL, COLGROUP, TABLE, TBODY, TD, TR	{	
+	color:	black;
+	text-decoration:	none;
+	border-color:	black;
+	border-style:	none;
+	}
+TABLE,TD,TR,IMG {
+	align: center;
+}	
+CAPTION {
+	align: right ;
+	}		
+A:link	{	
+	text-decoration:	none;
+	font-weight:	bold; 
+	color:black; 
+	}	
+		
+A:visited	{	
+	text-decoration:	none;
+	font-weight:	bold;
+	color:grey;
+	}	
+		
+A:active	{	
+	text-decoration:	none;
+	font-weight:	bold;
+	background:	 #CCF;
+	color:black;
+	}	
+		
+A:hover	{	
+	color:red;
+	text-decoration: none;
+  	font-weight:	italic;
+	}	
+		
+A.offsite	{	
+	text-decoration:	none;
+	font-weight:	italic;
+	color:red;
+	}	
+		
+	/* end affordances */	
+
+	/* begin body box */	/* 5 - 'ninths symmetric' */
+
+BODY	{
+
+	margin-top:	1.58em;
+	margin-left:	2%;
+	margin-right:	2%;
+	margin-bottom:	1.58em;
+	
+	padding-top:	2;
+	padding-left:	2;
+	padding-right:	2;
+	padding-bottom:	2;
+	border-top:	0;
+	border-left:	0;
+	border-bottom:	0;
+	border-right:	0;
+	}
+	/* end body box */
+
+DL {
+/*	margin-left:50; */
+}
+
+.leftMenu {
+	font-size: x-small;
+}
+
+.bottomMenu {
+	font-size: xx-small;
+}
+
+.sliceDisplay {
+	padding: 0;
+	margin-left: auto;
+	margin-right: auto;
+	border: 1;
+	border-color: black;
+	border-style: groove;
+}
+
+.sliceLegend {
+	font-size: xx-small;
+	text-align: center;
+	vertical-align: middle;
+}
+
+
+.sliceControl {
+	padding: 0;
+	margin-left: auto;
+	margin-right: auto;
+	border: 0;
+	border-color: black;
+	border-style: solid;
+}
+
+.sliceControlTD {
+	padding: 5;
+	margin-left: 2;
+	margin-right: 2;
+	border: 1;
+	border-left: 1 solid black;
+	border-top: 1 solid black;
+	border-bottom: 1 solid black;
+	border-right: 1 solid black;
+	vertical-align: top;
+}
+
+.sliceControlItemsTD {
+	padding: 5;
+	margin-left: 2;
+	margin_right: 2;
+	border: 1;
+	border-left: 1 solid black;
+	border-top: 1 solid black;
+	border-bottom: 1 solid black;
+	border-right: 1 solid black;
+	vertical-align: top;
+	font-size: 75%;
+}
+
+.sampleTable {
+	padding: 0;
+	spacing: 5;
+	margin-left: auto;
+	margin-right: auto;
+	border: 1;
+	border-color: black;
+	border-style: groove;
+}
+
+.profileTD {
+	margin-left: 2;
+	margin-right: 2;
+	border: 1;
+	border-left: 1 solid black;
+	border-top: 1 solid black;
+	border-bottom: 1 solid black;
+	border-right: 1 solid black;
+}
+
+.borderedTD {
+	border: 1;
+	border-left: 1 solid black;
+	border-top: 1 solid black;
+	border-bottom: 1 solid black;
+	border-right: 1 solid black;
+}
+
+.firstLetter {
+	color: #C00;
+	font-weight: bold;
+}
+
+.important {
+	color: red;
+	font-weight: bold;
+}
+
+.flowchart {
+	alignment: right;
+	text-decoration: none;
+}
+
+.flowcharttoolbar {
+	alignment: left;
+	text-decoration: none;
+}
+.toolbar {
+	alignment: left;
+	text-decoration: none;
+}
+/*
+	Color Definitions
+	*/
+
+.darkgreenColor {
+	color: #007F00;
+}
+.cyanColor {
+	color: #64FFFF;
+}
+.orangeColor {
+	color: #FF7F00;
+}
+.blueColor {
+	color: #0000FF;
+}
+.greenColor {
+	color: #00FF00;
+}
+.yellowColor {
+	color: #FFFF00;
+}
+.redColor {
+	color: #FF0000;
+}
+-->
+</STYLE>
